@@ -11,9 +11,6 @@
         <file>textures/red.png</file>
         <file>textures/yellow.png</file>
         <file>textures/blue2.png</file>
-        <file>models/table.obj</file>
-        <file>models/flat_surface.obj</file>
-        <file>models/CoffeeTable.obj</file>
         <file>models/tabletext.obj</file>
         <file>textures/wood.png</file>
     </qresource>

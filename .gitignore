@@ -1,0 +1,5 @@
+# Build folder
+build-*/
+
+# Custom Qt user file
+Code/OpenGL_competition.pro.user
