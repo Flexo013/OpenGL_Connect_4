@@ -1,0 +1,40 @@
+Getting a blank screen and no clue why?
+Try the following checklist:
+
+0. Check if your OpenGL version used is >= 3.3 ( should be a line in the console of your application )
+
+1. Check if your shaders compiled. Usally an error log will be displayed in the console of 
+your application.
+
+2. Check if your shaders are bound before drawing and setting any uniform. ( shaderprogram->bind() )
+
+3. Check if your model really contains the data you whish to render. 
+Check the length of the arrays returned by your Model.
+
+4. Check if your buffers are setup correctly with glVertexAttribPointer(), 
+especially the location parameter which should match those in the shaders.
+( 0 for positions, 1 for colors and 2 for normals in the provided shaders )
+
+5. Check if glEnableVertexAttribArray() is called in the buffer initialization for the
+attribute location (0,1,2) you whish to render.
+
+6. Check if you bound the Vertex Array object before drawing.
+
+7. Check your transformation matrices. 
+For example, create a QVector3D of known location and multiply it with your 
+matrices (P * V * M * Vector) and check the outcome.
+It should be somewhere between x: [-1, 1], y: [-1,1] and z [0,1] after projection. 
+Try modifying your transformations if it is not within those ranges. ( translating the View for example )
+
+8. Check if the input data from the fragment shader is available. 
+Try rendering with just fColor = vec4(normalVec,1.0); to check the normals for example.
+This also works on uniforms.
+
+9. Check if culling is enabled (glEnable(GL_CULL_FACE); is called) and disable it.
+
+
+If you are still having trouble, ask one of the TA's or send an email to 
+rugcomputergraphics17+opengl@gmail.com
+
+If you would like to add a step to this checklist, please do tell us ;)
+

@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/vertshader_phong.glsl</file>
+        <file>shaders/vertshader_normal.glsl</file>
+        <file>shaders/vertshader_gouraud.glsl</file>
+        <file>shaders/fragshader_phong.glsl</file>
+        <file>shaders/fragshader_normal.glsl</file>
+        <file>shaders/fragshader_gouraud.glsl</file>
+        <file>models/connect4text.obj</file>
+        <file>models/disktext.obj</file>
+        <file>textures/red.png</file>
+        <file>textures/yellow.png</file>
+        <file>textures/blue2.png</file>
+        <file>models/table.obj</file>
+        <file>models/flat_surface.obj</file>
+        <file>models/CoffeeTable.obj</file>
+        <file>models/tabletext.obj</file>
+        <file>textures/wood.png</file>
+    </qresource>
+</RCC>
