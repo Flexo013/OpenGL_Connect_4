@@ -8,3 +8,8 @@ You can use the buttons **1 through 7** to select in which column you will drop 
 
 ## Credits
 Made by Floris Huizinga and Yeo Wen Jing for the course Computer Graphics at the RUG.
+
+## Screenshots
+
+![Board](https://github.com/Flexo013/OpenGL_Connect_4/blob/master/Screenshots/1_empty_board.png?raw=true)
+![Board2](https://github.com/Flexo013/OpenGL_Connect_4/blob/master/Screenshots/2_played_board.png?raw=true)
