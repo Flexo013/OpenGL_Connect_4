@@ -2,4 +2,4 @@
 build-*/
 
 # Custom Qt user file
-Code/OpenGL_competition.pro.user
+Code/OpenGL_competition.pro.user*

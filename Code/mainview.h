@@ -60,11 +60,11 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
     GLuint boardSize,  diskSize, tableSize;
 
     // Texture
-    GLuint blueTexturePtr, yellowTexturePtr, redTexturePtr, woodTexturePtr;
+    GLuint blue2TexturePtr, grey2TexturePtr, yellow2TexturePtr, red2TexturePtr, yellowTexturePtr, redTexturePtr, woodTexturePtr;
 
     // Transforms
     float scale = 1.f;
-    QVector3D rotation, animation1Rotation, animation2Rotation, animation3Rotation, animation4Rotation;
+    QVector3D rotation;
     QMatrix4x4 projectionTransform;
     QMatrix4x4 boardTransform, diskTransforms[42], tableTransform, playerDiskTransform;
 
@@ -83,7 +83,8 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
     int diskCount = 0;
     int columnCount[7] = {0,0,0,0,0,0,0};
     bool yellowPlayer = true;
-
+    char board[6][7];
+    char gameWinner = '0';
 
 
 public:
@@ -103,6 +104,7 @@ public:
     void dropDisk(int column);
     void drawObject(GLuint texturePtr, GLuint VAO, GLuint size, QMatrix4x4 objectTransform);
     void clearBoard();
+    int isGameWon(int x, int y);
     
 protected:
     void initializeGL();
@@ -129,7 +131,7 @@ private:
 
     // Loads texture data into the buffer of texturePtr.
     void loadTextures();
-    void loadTexture(QString file, GLuint blueTexturePtr);
+    void loadTexture(QString file, GLuint blue2TexturePtr);
 
     void destroyModelBuffers();
 

@@ -6,10 +6,9 @@
 void MainView::keyPressEvent(QKeyEvent *ev)
 {
     if(ev->key() >= 49 && ev->key() <= 55){
-        qDebug() << "Column: " << ev->key() - 48;
         dropDisk(ev->key() - 48);
     } else if (ev->key() == 48 || ev->key() == 82){
-        qDebug() << "Reset board.";
+        qDebug() << "The board has been reset.";
         clearBoard();
     }
 

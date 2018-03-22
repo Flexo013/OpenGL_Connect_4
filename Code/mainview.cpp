@@ -32,10 +32,13 @@ MainView::~MainView() {
 
     qDebug() << "MainView destructor";
 
-    glDeleteTextures(1, &blueTexturePtr);
+    glDeleteTextures(1, &blue2TexturePtr);
+    glDeleteTextures(1, &grey2TexturePtr);
+    glDeleteTextures(1, &yellow2TexturePtr);
+    glDeleteTextures(1, &red2TexturePtr);
     glDeleteTextures(1, &yellowTexturePtr);
     glDeleteTextures(1, &redTexturePtr);
-    //glDeleteTextures(1, &object4texturePtr);
+    glDeleteTextures(1, &woodTexturePtr);
 
     destroyModelBuffers();
 }
@@ -82,6 +85,8 @@ void MainView::initializeGL() {
     timer.start(1000.0 / 60.0);
     //qDebug() << "Interval: " << timer.interval();
     //qDebug() << "Time elapsed: " << QTime.elapsed();
+
+    clearBoard();
 }
 
 void MainView::createShaderProgram()
@@ -239,18 +244,33 @@ void MainView::loadMesh()
 
 void MainView::loadTextures()
 {
-    glGenTextures(1, &blueTexturePtr);
-    loadTexture(":/textures/blue2.png", blueTexturePtr);
+    // Smooth blue texture
+    glGenTextures(1, &blue2TexturePtr);
+    loadTexture(":/textures/blue2.png", blue2TexturePtr);
 
+    // Smooth grey texture
+    glGenTextures(1, &grey2TexturePtr);
+    loadTexture(":/textures/grey2.png", grey2TexturePtr);
+
+    // Smooth yellow texture
+    glGenTextures(1, &yellow2TexturePtr);
+    loadTexture(":/textures/yellow2.png", yellow2TexturePtr);
+
+    // Smooth red texture
+    glGenTextures(1, &red2TexturePtr);
+    loadTexture(":/textures/red2.png", red2TexturePtr);
+
+    // Bumpy yellow texture
     glGenTextures(1, &yellowTexturePtr);
     loadTexture(":/textures/yellow.png", yellowTexturePtr);
 
+    // Bumpy red texture
     glGenTextures(1, &redTexturePtr);
     loadTexture(":/textures/red.png", redTexturePtr);
 
+    // Wood texture
     glGenTextures(1, &woodTexturePtr);
     loadTexture(":/textures/wood.png", woodTexturePtr);
-
 }
 
 void MainView::loadTexture(QString file, GLuint texturePtr)
@@ -270,35 +290,126 @@ void MainView::loadTexture(QString file, GLuint texturePtr)
                  0, GL_RGBA, GL_UNSIGNED_BYTE, imageData.data());
 }
 
-// --- OpenGL drawing
+// --- Game logic
 
-/**
- * @brief MainView::paintGL
- *
- * Actual function used for drawing to the screen
- *
- */
-void MainView::clearBoard(){
+void MainView::clearBoard()
+{
     diskCount = 0;
 
     for(int i = 0; i < 7; i++){
         columnCount[i] = 0;
     }
+
+    for(int i = 0; i < 6; i++){
+        for(int j = 0; j < 7; j++){
+            board[i][j] = '0';
+        }
+    }
+
+    gameWinner = '0';
 }
+
+// Checks if game is won. Returns 0 for an unfinished game, 1 for a win and 2 for a draw.
+// The given parameters are the x and y coordinate of the placed piece.
+int MainView::isGameWon(int x, int y)
+{
+    char currentPlayer = board[x][y]; // The player who placed the most recent piece
+    int i, j;
+
+    // Checks vertically
+    int verticalPieces = 1;
+    for(i = x - 1; i >= 0 && board[i][y] == currentPlayer; verticalPieces++, i--);
+    for(i = x + 1; i <= 5 && board[i][y] == currentPlayer; verticalPieces++, i++);  // Technically not required because there can be no pieces above the placed one
+    if (verticalPieces >= 4) return 1;
+
+    // Checks horizontally
+    int horizontalPieces = 1;
+    for(j = y - 1; j >= 0 && board[x][j] == currentPlayer; horizontalPieces++, j--);
+    for(j = y + 1; j <= 6 && board[x][j] == currentPlayer; horizontalPieces++, j++);
+    if (horizontalPieces >= 4) return 1;
+
+    // Checks bottom left to top right diagonal
+    int diagonalPieces1 = 1;
+    for (i = x - 1, j = y - 1; i >= 0 && j >= 0 && board[i][j] == currentPlayer; diagonalPieces1++, i--, j--);
+    for (i = x + 1, j = y + 1; i <= 5 && j <= 6 && board[i][j] == currentPlayer; diagonalPieces1++, i++, j++);
+    if (diagonalPieces1 >= 4) return 1;
+
+    // Checks top left to bottom right diagonal
+    int diagonalPieces2 = 1;
+    for (i = x - 1, j = y + 1; i >= 0 && j <= 6 && board[i][j] == currentPlayer; diagonalPieces2++, i--, j++);
+    for (i = x + 1, j = y - 1; i <= 5 && j >= 0 && board[i][j] == currentPlayer; diagonalPieces2++, i++, j--);
+    if (diagonalPieces2 >= 4) return 1;
+
+    if(diskCount >= 42){
+        return 2;
+    }
+    return 0;
+}
+
+void MainView::dropDisk(int column)
+{
+    int indexedColumn = column - 1;
+
+    if(gameWinner == 'y' || gameWinner == 'r'){
+        qDebug() << "Game over! Press 0 or R to play another game.";
+    } else {
+        if(columnCount[indexedColumn] < 6){
+            // Calculations that are needed for the object transform matrix
+            float x = (column - 4) * 0.58;
+            float y = (columnCount[indexedColumn] * 0.42) - 1;
+            int keyFrameNumber = frameNumber; // Start drop animation at frame that a key is pressed
+
+            if(yellowPlayer){
+                qDebug() << "Yellow played in column:" << column;
+                disks[diskCount] = Disk(keyFrameNumber, x, y, true);
+                board[columnCount[indexedColumn]][indexedColumn] = 'y';
+            } else {
+                qDebug() << "Red played in column:" << column;
+                disks[diskCount] = Disk(keyFrameNumber, x, y, false);
+                board[columnCount[indexedColumn]][indexedColumn] = 'r';
+            }
+
+            // Increment disk count now, so isGameWon() can also check whether a draw has occurred
+            diskCount += 1;
+
+            int gameState = isGameWon(columnCount[indexedColumn], indexedColumn);
+
+            switch (gameState){
+                case 0:
+                    break;
+                case 1:
+                    gameWinner = yellowPlayer ? 'y' : 'r';
+                    qDebug() << "Congratulations! You won!";
+                    break;
+                case 2:
+                    gameWinner = 'd';
+                    break;
+            }
+
+            // Increment column count, so the next piece in this column knows its location
+            columnCount[indexedColumn] += 1;
+            // Turn completed. Switch turn to other player.
+            yellowPlayer = !yellowPlayer;
+        } else {
+            qDebug() << "You can't play here. Column " << column << " is full." ;
+        }
+    }
+}
+
+// --- OpenGL drawing
 
 void MainView::drawObject(GLuint texturePtr, GLuint VAO, GLuint size, QMatrix4x4 objectTransform)
 {
-
     switch (currentShader) {
-    case NORMAL:
-        updateNormalUniforms(objectTransform, objectTransform.normalMatrix());
-        break;
-    case GOURAUD:
-        updateGouraudUniforms(objectTransform, objectTransform.normalMatrix());
-        break;
-    case PHONG:
-        updatePhongUniforms(objectTransform, objectTransform.normalMatrix());
-        break;
+        case NORMAL:
+            updateNormalUniforms(objectTransform, objectTransform.normalMatrix());
+            break;
+        case GOURAUD:
+            updateGouraudUniforms(objectTransform, objectTransform.normalMatrix());
+            break;
+        case PHONG:
+            updatePhongUniforms(objectTransform, objectTransform.normalMatrix());
+            break;
     }
 
     glActiveTexture(GL_TEXTURE0);
@@ -307,30 +418,12 @@ void MainView::drawObject(GLuint texturePtr, GLuint VAO, GLuint size, QMatrix4x4
     glDrawArrays(GL_TRIANGLES, 0, size);
 }
 
-void MainView::dropDisk(int column){
-    if(columnCount[column - 1] < 6){
-        //calculations
-        float x = (column - 4) * 0.58;
-        float y = (columnCount[column - 1] * 0.42) - 1;
-        int keyFrameNumber = frameNumber;
-
-        if(yellowPlayer){
-            //drop yellow disk
-            disks[diskCount] = Disk(keyFrameNumber, x, y, true);
-        } else {
-            //drop red disk
-            disks[diskCount] = Disk(keyFrameNumber, x, y, false);
-        }
-        //change player
-        yellowPlayer = !yellowPlayer;
-        //increment column count
-        columnCount[column - 1] += 1;
-        //increment disk count
-        diskCount += 1;
-    } else {
-        qDebug() << "Column " << column << " is full." ;
-    }
-}
+/**
+ * @brief MainView::paintGL
+ *
+ * Actual function used for drawing to the screen
+ *
+ */
 
 void MainView::paintGL() {
     // Clear the screen before rendering
@@ -342,26 +435,39 @@ void MainView::paintGL() {
     // Choose the selected shader.
     QOpenGLShaderProgram *shaderProgram;
     switch (currentShader) {
-    case NORMAL:
-        shaderProgram = &normalShaderProgram;
-        shaderProgram->bind();
-        break;
-    case GOURAUD:
-        shaderProgram = &gouraudShaderProgram;
-        shaderProgram->bind();
-        break;
-    case PHONG:
-        shaderProgram = &phongShaderProgram;
-        shaderProgram->bind();
-        break;
+        case NORMAL:
+            shaderProgram = &normalShaderProgram;
+            shaderProgram->bind();
+            break;
+        case GOURAUD:
+            shaderProgram = &gouraudShaderProgram;
+            shaderProgram->bind();
+            break;
+        case PHONG:
+            shaderProgram = &phongShaderProgram;
+            shaderProgram->bind();
+            break;
     }
 
     // Increment frameNumber every time the world is painted
     frameNumber += 1;
 
     // Connect 4 board
-    // Set the texture and draw the mesh.
-    drawObject(blueTexturePtr, boardVAO, boardSize, boardTransform);
+    // Select a different smooth texture depending on who won the game
+    switch(gameWinner){
+        case 'y':
+            drawObject(yellow2TexturePtr, boardVAO, boardSize, boardTransform);
+            break;
+        case 'r':
+            drawObject(red2TexturePtr, boardVAO, boardSize, boardTransform);
+            break;
+        case 'd':
+            drawObject(grey2TexturePtr, boardVAO, boardSize, boardTransform);
+            break;
+        default:
+            drawObject(blue2TexturePtr, boardVAO, boardSize, boardTransform);
+            break;
+    }
 
     // Draw every single disk
     for (int i = 0; i < diskCount; i++){
@@ -372,6 +478,7 @@ void MainView::paintGL() {
         }
     }
 
+    // Draw one extra disk on the table that changes color depending on whose turn it is
     if (yellowPlayer) {
         drawObject(yellowTexturePtr, diskVAO, diskSize, playerDiskTransform);
     } else {
@@ -416,8 +523,7 @@ void MainView::updateGouraudUniforms(QMatrix4x4 viewTransform, QMatrix3x3 normal
     glUniform3fv(uniformLightPositionGouraud, 1, &lightPosition[0]);
     glUniform3fv(uniformLightColourGouraud, 1, &lightColour[0]);
 
-    glUniform1i(uniformTexture1SamplerGouraud, 0); // Redundant now, but useful when you have multiple textures.
-
+    glUniform1i(uniformTexture1SamplerGouraud, 0);
 }
 
 void MainView::updatePhongUniforms(QMatrix4x4 viewTransform, QMatrix3x3 normalTransform)
@@ -445,7 +551,6 @@ void MainView::updateProjectionTransform()
     projectionTransform.rotate(rotation.y(), QVector3D (0.0f,1.0f,0.0f));
     projectionTransform.rotate(rotation.z(), QVector3D (0.0f,0.0f,1.0f));
     projectionTransform.translate(0, 0, 6);
-
 }
 
 void MainView::updateModelTransforms()
@@ -458,11 +563,11 @@ void MainView::updateModelTransforms()
     // Disks
     for(int i = 0; i < diskCount; i++){
         diskTransforms[i].setToIdentity();
-        diskTransforms[i].translate(disks[i].x, disks[i].y + 7.2, -5);
+        diskTransforms[i].translate(disks[i].x, disks[i].y + 7.2, -5); // Put the disk above its final position for animation
         if (frameNumber - disks[i].keyFrameNumber <= 60){
-            diskTransforms[i].translate(0,-0.12 * (frameNumber - disks[i].keyFrameNumber) , 0);
+            diskTransforms[i].translate(0,-0.12 * (frameNumber - disks[i].keyFrameNumber) , 0);  // 1 second drop animation
         } else {
-            diskTransforms[i].translate(0.0, -7.2, 0.0);
+            diskTransforms[i].translate(0.0, -7.2, 0.0); // After 1 second the disk has reached its final location
         }
         diskTransforms[i].rotate(90.0, QVector3D(1.0f,0.0f,0.0f));
         diskTransforms[i].scale(scale * 0.2);
@@ -509,7 +614,6 @@ void MainView::setShadingMode(ShadingMode shading)
     qDebug() << "Changed shading to" << shading;
     currentShader = shading;
 }
-
 
 // --- Private helpers
 

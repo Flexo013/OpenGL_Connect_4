@@ -13,5 +13,8 @@
         <file>textures/blue2.png</file>
         <file>models/tabletext.obj</file>
         <file>textures/wood.png</file>
+        <file>textures/red2.png</file>
+        <file>textures/yellow2.png</file>
+        <file>textures/grey2.png</file>
     </qresource>
 </RCC>
