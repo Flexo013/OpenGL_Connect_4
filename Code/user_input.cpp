@@ -35,7 +35,7 @@ void MainView::keyReleaseEvent(QKeyEvent *ev)
 // It also fires two mousePress and mouseRelease events!
 void MainView::mouseDoubleClickEvent(QMouseEvent *ev)
 {
-    qDebug() << "Mouse double clicked:" << ev->button();
+    //qDebug() << "Mouse double clicked:" << ev->button();
 
     update();
 }
@@ -43,7 +43,7 @@ void MainView::mouseDoubleClickEvent(QMouseEvent *ev)
 // Triggered when moving the mouse inside the window (only when the mouse is clicked!)
 void MainView::mouseMoveEvent(QMouseEvent *ev)
 {
-    qDebug() << "x" << ev->x() << "y" << ev->y();
+    //qDebug() << "x" << ev->x() << "y" << ev->y();
 
     update();
 }
@@ -51,7 +51,7 @@ void MainView::mouseMoveEvent(QMouseEvent *ev)
 // Triggered when pressing any mouse button
 void MainView::mousePressEvent(QMouseEvent *ev)
 {
-    qDebug() << "Mouse button pressed:" << ev->button();
+    qDebug() << "You have selected the game.";
 
     update();
     // Do not remove the line below, clicking must focus on this widget!
@@ -61,7 +61,7 @@ void MainView::mousePressEvent(QMouseEvent *ev)
 // Triggered when releasing any mouse button
 void MainView::mouseReleaseEvent(QMouseEvent *ev)
 {
-    qDebug() << "Mouse button released" << ev->button();
+    //qDebug() << "Mouse button released" << ev->button();
 
     update();
 }
@@ -70,7 +70,7 @@ void MainView::mouseReleaseEvent(QMouseEvent *ev)
 void MainView::wheelEvent(QWheelEvent *ev)
 {
     // Implement something
-    qDebug() << "Mouse wheel:" << ev->delta();
+    //qDebug() << "Mouse wheel:" << ev->delta();
 
     update();
 }
