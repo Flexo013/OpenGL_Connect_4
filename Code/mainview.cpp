@@ -389,7 +389,7 @@ void MainView::dropDisk(int column)
             // Turn completed. Switch turn to other player.
             yellowPlayer = !yellowPlayer;
         } else {
-            qDebug() << "You can't play here. Column " << column << " is full." ;
+            qDebug() << "You can't play here. Column" << column << "is full." ;
         }
     }
 }
